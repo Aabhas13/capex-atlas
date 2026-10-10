@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Capex Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@500;700&family=Poppins:wght@400;500;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--font:'Inter',system-ui,sans-serif;--acc:#4ade80;--bg:#0c0d10;--fg:#eceef2;--mut:#8b919c;--card:#15171c;--line:#252830;--bd:1px solid var(--line);--blur:none}
+[data-theme=light]{--bg:#f3f4f7;--fg:#14161a;--mut:#6b7280;--card:#fff;--line:#e2e5ea}
+[data-theme=amoled]{--bg:#000;--fg:#f5f5f5;--mut:#85878d;--card:#0a0a0a;--line:#1c1c1f}
+[data-theme=glass]{--bg:#0b1020;--fg:#fff;--mut:rgba(255,255,255,.62);--card:rgba(255,255,255,.09);--line:rgba(255,255,255,.2);--blur:blur(20px) saturate(140%)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:var(--font);background:var(--bg);color:var(--fg);min-height:100vh;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);transition:background .3s,color .3s}
+[data-theme=glass] body{background:radial-gradient(60% 40% at 15% 10%,#6d28d9aa,transparent 70%),radial-gradient(50% 40% at 90% 30%,#0ea5e9aa,transparent 70%),radial-gradient(60% 50% at 40% 100%,#10b981aa,transparent 70%),#0b1020;background-attachment:fixed}
+.wrap{max-width:560px;margin:0 auto;padding:16px 14px 60px}
+.card{background:var(--card);border:var(--bd);border-radius:20px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+h1{font-size:18px;margin:0;flex:1;font-weight:700;letter-spacing:-.01em}
+select,button,input{font:inherit;color:inherit}
+.pill{background:var(--card);border:var(--bd);border-radius:999px;padding:8px 12px;font-size:13px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+select.pill{appearance:none;padding-right:12px}
+select option{color:#111}
+.ico{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:var(--card);border:var(--bd);backdrop-filter:var(--blur)}
+.hero{padding:18px 18px 8px;margin-bottom:14px}
+.hero .lab{color:var(--mut);font-size:13px;display:flex;justify-content:space-between}
+.rate{font-size:46px;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.rate small{font-size:18px;color:var(--mut);font-weight:500;margin-right:6px}
+.delta{font-size:13px;font-weight:600}
+.up{color:#f87171}.dn{color:#4ade80}
+.hero svg{width:100%;height:70px;display:block;margin-top:6px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:999px;background:var(--card);border:var(--bd);font-size:13px;cursor:pointer;backdrop-filter:var(--blur)}
+.chip.on{background:var(--acc);color:#06130a;border-color:var(--acc);font-weight:600}
+h2{font-size:15px;margin:20px 4px 8px;font-weight:600}
+h2 span{color:var(--mut);font-weight:400;font-size:12px;margin-left:6px}
+.sec{padding:6px 14px}
+.row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:var(--bd)}
+.row:last-child{border:0}
+.row .nm{flex:1;min-width:0}
+.row .nm b{font-weight:600;font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .nm i{font-style:normal;color:var(--mut);font-size:12px}
+.row .vl{text-align:right;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;min-width:92px}
+.row .vl i{display:block;font-style:normal;font-size:11px;font-weight:400;color:var(--mut)}
+.bar{height:5px;border-radius:4px;background:var(--line);margin-top:6px;overflow:hidden}
+.bar>div{height:100%;background:var(--acc);border-radius:4px;transition:width .5s}
+.bar.b2>div{opacity:.45}
+.fl{font-size:20px;width:26px;text-align:center}
+.rk{color:var(--mut);font-size:12px;width:20px}
+.btn{display:block;width:100%;padding:12px;margin-top:8px;border-radius:14px;border:var(--bd);background:transparent;cursor:pointer;font-size:13px}
+.btn.pri{background:var(--acc);color:#06130a;border-color:var(--acc);font-weight:600}
+.status{font-size:11.5px;color:var(--mut);line-height:1.6;margin:18px 4px 0}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:#9ca3af}
+.dot.ok{background:#4ade80}.dot.bad{background:#f87171}
+/* sheet */
+#sheet{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;z-index:9}
+#sheet.open{display:flex}
+.panel{width:100%;max-width:560px;margin:0 auto;max-height:88vh;overflow:auto;border-radius:24px 24px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0));background:var(--bg);border:var(--bd);color:var(--fg)}
+[data-theme=glass] .panel{background:rgba(20,24,40,.7);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px)}
+.panel h3{margin:0 0 14px;font-size:16px}
+.lbl{font-size:12px;color:var(--mut);margin:14px 0 6px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{padding:8px 13px;border-radius:12px;border:var(--bd);background:var(--card);cursor:pointer;font-size:13px}
+.seg button.on{outline:2px solid var(--acc)}
+.sw{width:30px;height:30px;border-radius:50%;padding:0!important;border:2px solid transparent!important}
+.sw.on{outline:2px solid var(--fg)!important;outline-offset:2px}
+input[type=text],input[type=password]{width:100%;padding:11px 12px;border-radius:12px;border:var(--bd);background:var(--card);font-size:13px}
+.conv{padding:14px 16px;margin-bottom:14px}
+.conv .lab{color:var(--mut);font-size:13px;display:flex;justify-content:space-between;gap:8px;margin:0 0 10px}
+.cvrow{display:flex;gap:8px;align-items:center}
+.cvrow input{flex:1;min-width:0;width:auto;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.cvrow select{width:96px;flex:none}
+.cvout{flex:1;min-width:0;font-size:20px;font-weight:700;padding:11px 12px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.swap{display:block;margin:6px auto;width:38px;height:30px;border-radius:999px;border:var(--bd);background:var(--card);cursor:pointer;font-size:16px}
+.search{margin:0 0 8px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Capex Atlas</h1>
+    <select id="cur" class="pill" aria-label="Currency"></select>
+    <div class="ico" id="gear" role="button" aria-label="Settings">⚙</div>
+  </header>
+
+  <section class="card hero">
+    <div class="lab"><span>US Dollar to Indian Rupee</span><span id="fxAge">…</span></div>
+    <div class="rate"><small>$1 =</small><span id="fxNow">—</span></div>
+    <div class="delta" id="fxDelta">&nbsp;</div>
+    <svg id="spark" viewBox="0 0 300 70" preserveAspectRatio="none"></svg>
+  </section>
+
+  <section class="card conv" id="conv">
+    <div class="lab"><span>Currency converter</span><span id="cvRate"></span></div>
+    <div class="cvrow"><input type="text" id="cvAmt" inputmode="decimal" autocomplete="off" aria-label="Amount"><select id="cvFrom" class="pill" aria-label="From currency"></select></div>
+    <button class="swap" id="cvSwap" aria-label="Swap currencies">⇅</button>
+    <div class="cvrow"><div class="cvout" id="cvOut">—</div><select id="cvTo" class="pill" aria-label="To currency"></select></div>
+  </section>
+
+  <div class="chips" id="chips"></div>
+
+  <h2>Countries <span>listed-company capex vs FDI inflow</span></h2>
+  <section class="card sec" id="ctry"></section>
+
+  <h2 id="coTitle">Top companies <span>capital spending, latest year</span></h2>
+  <input type="text" id="q" class="search" placeholder="Search company or ticker" autocomplete="off">
+  <section class="card sec" id="cos"></section>
+  <button class="btn" id="more">Show all</button>
+
+  <h2>Where the money goes <span>top regions by share of national investment</span></h2>
+  <section class="card sec" id="regs"></section>
+
+  <p class="status" id="status"></p>
+</div>
+
+<div id="sheet"><div class="panel">
+  <h3>Settings</h3>
+  <div class="lbl">Theme</div>
+  <div class="seg" id="themes"></div>
+  <div class="lbl">Font</div>
+  <div class="seg" id="fonts"></div>
+  <div class="lbl">Accent</div>
+  <div class="seg" id="accs"></div>
+  <div class="lbl">Company data feed URL (the data.json your GitHub Action publishes)</div>
+  <input type="text" id="feed" placeholder="https://raw.githubusercontent.com/USER/REPO/main/data.json" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <button class="btn pri" id="updAll">Update everything now</button>
+  <button class="btn" id="reset">Reset all settings</button>
+  <button class="btn" id="close">Done</button>
+</div></div>
+
+<script>
+/* ============ EDITABLE DATA ============ */
+/* Where daily company data comes from (data.json made by update_data.py via GitHub Actions).
+   Paste your URL here once, or in Settings. Leave empty to use the built-in snapshot. */
+const DATA_URL="";
+/* Top 100 listed companies per country: [name, Yahoo ticker, country, capex snapshot in USD billions or null].
+   update_data.py reads this exact block, so edit tickers here and both stay in sync. */
+const COMPANIES=/*CO_START*/[["Nvidia","NVDA","US",null],
+["Microsoft","MSFT","US",64.0],
+["Apple","AAPL","US",9.0],
+["Alphabet","GOOGL","US",52.0],
+["Amazon","AMZN","US",83.0],
+["Meta","META","US",39.0],
+["Broadcom","AVGO","US",null],
+["Tesla","TSLA","US",11.0],
+["Berkshire Hathaway","BRK-B","US",null],
+["Eli Lilly","LLY","US",null],
+["JPMorgan Chase","JPM","US",null],
+["Walmart","WMT","US",24.0],
+["Visa","V","US",null],
+["Oracle","ORCL","US",null],
+["ExxonMobil","XOM","US",31.0],
+["Mastercard","MA","US",null],
+["Netflix","NFLX","US",null],
+["Costco","COST","US",null],
+["Johnson & Johnson","JNJ","US",null],
+["Home Depot","HD","US",null],
+["Procter & Gamble","PG","US",null],
+["AbbVie","ABBV","US",null],
+["Bank of America","BAC","US",null],
+["Chevron","CVX","US",16.0],
+["Coca-Cola","KO","US",null],
+["AMD","AMD","US",null],
+["Palantir","PLTR","US",null],
+["GE Aerospace","GE","US",null],
+["Cisco","CSCO","US",null],
+["Wells Fargo","WFC","US",null],
+["T-Mobile US","TMUS","US",null],
+["Philip Morris","PM","US",null],
+["Salesforce","CRM","US",null],
+["Abbott Labs","ABT","US",null],
+["IBM","IBM","US",null],
+["Morgan Stanley","MS","US",null],
+["Linde","LIN","US",null],
+["McDonald's","MCD","US",null],
+["American Express","AXP","US",null],
+["Goldman Sachs","GS","US",null],
+["Merck","MRK","US",null],
+["Disney","DIS","US",null],
+["AT&T","T","US",null],
+["Uber","UBER","US",null],
+["RTX","RTX","US",null],
+["Caterpillar","CAT","US",null],
+["PepsiCo","PEP","US",null],
+["ServiceNow","NOW","US",null],
+["Verizon","VZ","US",null],
+["Intuit","INTU","US",null],
+["Qualcomm","QCOM","US",null],
+["Booking Holdings","BKNG","US",null],
+["Thermo Fisher","TMO","US",null],
+["Intuitive Surgical","ISRG","US",null],
+["Charles Schwab","SCHW","US",null],
+["Boeing","BA","US",null],
+["Texas Instruments","TXN","US",null],
+["Citigroup","C","US",null],
+["Amgen","AMGN","US",null],
+["BlackRock","BLK","US",null],
+["S&P Global","SPGI","US",null],
+["NextEra Energy","NEE","US",null],
+["Accenture","ACN","US",null],
+["Adobe","ADBE","US",null],
+["Applied Materials","AMAT","US",null],
+["GE Vernova","GEV","US",null],
+["Danaher","DHR","US",null],
+["Honeywell","HON","US",null],
+["Progressive","PGR","US",null],
+["Stryker","SYK","US",null],
+["Union Pacific","UNP","US",null],
+["Arista Networks","ANET","US",null],
+["Lowe's","LOW","US",null],
+["TJX","TJX","US",null],
+["Boston Scientific","BSX","US",null],
+["Eaton","ETN","US",null],
+["ConocoPhillips","COP","US",null],
+["Pfizer","PFE","US",null],
+["KKR","KKR","US",null],
+["Deere","DE","US",null],
+["Lam Research","LRCX","US",null],
+["Micron","MU","US",null],
+["ADP","ADP","US",null],
+["UPS","UPS","US",null],
+["Palo Alto Networks","PANW","US",null],
+["Comcast","CMCSA","US",null],
+["Gilead","GILD","US",null],
+["Medtronic","MDT","US",null],
+["Amphenol","APH","US",null],
+["Lockheed Martin","LMT","US",null],
+["Analog Devices","ADI","US",null],
+["Starbucks","SBUX","US",null],
+["Intel","INTC","US",25.0],
+["Nike","NKE","US",null],
+["KLA","KLAC","US",null],
+["Southern Company","SO","US",null],
+["GM","GM","US",null],
+["Ford","F","US",null],
+["UnitedHealth","UNH","US",null],
+["CVS Health","CVS","US",null],
+["Tencent","0700.HK","CN",10.0],
+["Alibaba","9988.HK","CN",12.0],
+["Xiaomi","1810.HK","CN",null],
+["Meituan","3690.HK","CN",null],
+["China Construction Bank","0939.HK","CN",null],
+["ICBC","1398.HK","CN",null],
+["Bank of China","3988.HK","CN",null],
+["Agricultural Bank of China","1288.HK","CN",null],
+["China Mobile","0941.HK","CN",22.0],
+["CNOOC","0883.HK","CN",18.0],
+["PetroChina","0857.HK","CN",35.0],
+["Sinopec","0386.HK","CN",22.0],
+["China Telecom","0728.HK","CN",12.0],
+["China Unicom","0762.HK","CN",null],
+["Ping An Insurance","2318.HK","CN",null],
+["China Life","2628.HK","CN",null],
+["BYD","1211.HK","CN",null],
+["JD.com","9618.HK","CN",null],
+["Baidu","9888.HK","CN",null],
+["NetEase","9999.HK","CN",null],
+["Kuaishou","1024.HK","CN",null],
+["China Shenhua","1088.HK","CN",null],
+["Zijin Mining","2899.HK","CN",null],
+["Anhui Conch Cement","0914.HK","CN",null],
+["Anta Sports","2020.HK","CN",null],
+["China Resources Land","1109.HK","CN",null],
+["China Overseas Land","0688.HK","CN",null],
+["China Resources Power","0836.HK","CN",null],
+["China Resources Beer","0291.HK","CN",null],
+["CSPC Pharmaceutical","1093.HK","CN",null],
+["Sino Biopharm","1177.HK","CN",null],
+["Haidilao","6862.HK","CN",null],
+["Nongfu Spring","9633.HK","CN",null],
+["Mengniu Dairy","2319.HK","CN",null],
+["Postal Savings Bank","1658.HK","CN",null],
+["China Merchants Bank","3968.HK","CN",null],
+["CITIC Securities","6030.HK","CN",null],
+["CITIC Ltd","0267.HK","CN",null],
+["Yankuang Energy","1171.HK","CN",null],
+["Great Wall Motor","2333.HK","CN",null],
+["Geely Auto","0175.HK","CN",null],
+["NIO","9866.HK","CN",null],
+["Li Auto","2015.HK","CN",null],
+["XPeng","9868.HK","CN",null],
+["Bank of Communications","3328.HK","CN",null],
+["New China Life","1336.HK","CN",null],
+["CPIC","2601.HK","CN",null],
+["Lenovo","0992.HK","CN",null],
+["SMIC","0981.HK","CN",null],
+["Hua Hong Semiconductor","1347.HK","CN",null],
+["Trip.com","9961.HK","CN",null],
+["Bilibili","9626.HK","CN",null],
+["WuXi Biologics","2269.HK","CN",null],
+["Innovent Biologics","1801.HK","CN",null],
+["BeiGene","6160.HK","CN",null],
+["Kweichow Moutai","600519.SS","CN",null],
+["CATL","300750.SZ","CN",5.0],
+["Wuliangye","000858.SZ","CN",null],
+["Yangtze Power","600900.SS","CN",null],
+["Midea Group","000333.SZ","CN",null],
+["Gree Electric","000651.SZ","CN",null],
+["Jiangsu Hengrui","600276.SS","CN",null],
+["Foshan Haitian","603288.SS","CN",null],
+["LONGi Green Energy","601012.SS","CN",null],
+["Luxshare Precision","002475.SZ","CN",null],
+["East Money Information","300059.SZ","CN",null],
+["Hikvision","002415.SZ","CN",null],
+["Wanhua Chemical","600309.SS","CN",null],
+["China Shaanxi Coal","601225.SS","CN",null],
+["Power Construction of China","601669.SS","CN",null],
+["China Railway Construction","601186.SS","CN",null],
+["CRRC","601766.SS","CN",null],
+["Sany Heavy Industry","600031.SS","CN",null],
+["Muyuan Foods","002714.SZ","CN",null],
+["Mindray","300760.SZ","CN",null],
+["Yili Group","600887.SS","CN",null],
+["COSCO Shipping Holdings","601919.SS","CN",null],
+["BOE Technology","000725.SZ","CN",null],
+["iFlytek","002230.SZ","CN",null],
+["WuXi AppTec","603259.SS","CN",null],
+["Seres Group","601127.SS","CN",null],
+["Yunnan Baiyao","000538.SZ","CN",null],
+["Zhangzhou Pientzehuang","600436.SS","CN",null],
+["China National Nuclear Power","601985.SS","CN",null],
+["China Three Gorges Renewables","600905.SS","CN",null],
+["Baoshan Iron & Steel","600019.SS","CN",null],
+["Aluminum Corp of China","601600.SS","CN",null],
+["Will Semiconductor","603501.SS","CN",null],
+["Naura Technology","002371.SZ","CN",null],
+["Inovance Technology","300124.SZ","CN",null],
+["Sungrow Power","300274.SZ","CN",null],
+["Huatai Securities","601688.SS","CN",null],
+["Poly Developments","600048.SS","CN",null],
+["China Tourism Group Duty Free","601888.SS","CN",null],
+["Industrial Bank","601166.SS","CN",null],
+["Shanghai Pudong Development Bank","600000.SS","CN",null],
+["China Minsheng Bank","600016.SS","CN",null],
+["CITIC Bank","601998.SS","CN",null],
+["Haier Smart Home","600690.SS","CN",null],
+["Zhongji Innolight","300308.SZ","CN",null],
+["SAP","SAP.DE","DE",null],
+["Siemens","SIE.DE","DE",3.0],
+["Allianz","ALV.DE","DE",null],
+["Deutsche Telekom","DTE.DE","DE",17.0],
+["Munich Re","MUV2.DE","DE",null],
+["Airbus","AIR.DE","DE",null],
+["Rheinmetall","RHM.DE","DE",null],
+["Infineon","IFX.DE","DE",null],
+["Deutsche Bank","DBK.DE","DE",null],
+["Siemens Energy","ENR.DE","DE",null],
+["Mercedes-Benz","MBG.DE","DE",10.0],
+["BMW","BMW.DE","DE",9.0],
+["Volkswagen","VOW3.DE","DE",20.0],
+["BASF","BAS.DE","DE",5.0],
+["Bayer","BAYN.DE","DE",null],
+["Adidas","ADS.DE","DE",null],
+["DHL Group","DHL.DE","DE",4.0],
+["E.ON","EOAN.DE","DE",8.0],
+["RWE","RWE.DE","DE",7.0],
+["Henkel","HEN3.DE","DE",null],
+["Merck KGaA","MRK.DE","DE",null],
+["Fresenius","FRE.DE","DE",null],
+["Fresenius Medical Care","FME.DE","DE",null],
+["Hannover Re","HNR1.DE","DE",null],
+["Commerzbank","CBK.DE","DE",null],
+["Deutsche Boerse","DB1.DE","DE",null],
+["Beiersdorf","BEI.DE","DE",null],
+["Siemens Healthineers","SHL.DE","DE",null],
+["Zalando","ZAL.DE","DE",null],
+["Qiagen","QIA.DE","DE",null],
+["Symrise","SY1.DE","DE",null],
+["MTU Aero Engines","MTX.DE","DE",null],
+["Vonovia","VNA.DE","DE",null],
+["Heidelberg Materials","HEI.DE","DE",null],
+["Continental","CON.DE","DE",null],
+["Porsche AG","P911.DE","DE",null],
+["Porsche SE","PAH3.DE","DE",null],
+["Daimler Truck","DTG.DE","DE",null],
+["Brenntag","BNR.DE","DE",null],
+["Sartorius","SRT3.DE","DE",null],
+["Lufthansa","LHA.DE","DE",null],
+["TUI","TUI1.DE","DE",null],
+["CTS Eventim","EVD.DE","DE",null],
+["Fraport","FRA.DE","DE",null],
+["Gerresheimer","GXI.DE","DE",null],
+["Hochtief","HOT.DE","DE",null],
+["Kion Group","KGX.DE","DE",null],
+["LEG Immobilien","LEG.DE","DE",null],
+["Lanxess","LXS.DE","DE",null],
+["Nemetschek","NEM.DE","DE",null],
+["Puma","PUM.DE","DE",null],
+["Rational","RAA.DE","DE",null],
+["K+S","SDF.DE","DE",null],
+["Thyssenkrupp","TKA.DE","DE",null],
+["United Internet","UTDI.DE","DE",null],
+["Wacker Chemie","WCH.DE","DE",null],
+["Aixtron","AIXA.DE","DE",null],
+["Evonik","EVK.DE","DE",null],
+["Hugo Boss","BOSS.DE","DE",null],
+["Duerr","DUE.DE","DE",null],
+["GEA Group","G1A.DE","DE",null],
+["Hensoldt","HAG.DE","DE",null],
+["Jenoptik","JEN.DE","DE",null],
+["Talanx","TLX.DE","DE",null],
+["Stroeer","SAX.DE","DE",null],
+["TAG Immobilien","TEG.DE","DE",null],
+["Salzgitter","SZG.DE","DE",null],
+["Nordex","NDX1.DE","DE",null],
+["TeamViewer","TMV.DE","DE",null],
+["1&1","1U1.DE","DE",null],
+["SMA Solar","S92.DE","DE",null],
+["Carl Zeiss Meditec","AFX.DE","DE",null],
+["Bechtle","BC8.DE","DE",null],
+["Delivery Hero","DHER.DE","DE",null],
+["Evotec","EVT.DE","DE",null],
+["Fuchs","FPE3.DE","DE",null],
+["Bilfinger","GBF.DE","DE",null],
+["Grenke","GLJ.DE","DE",null],
+["Hapag-Lloyd","HLAG.DE","DE",null],
+["Knorr-Bremse","KBX.DE","DE",null],
+["Krones","KRN.DE","DE",null],
+["Nagarro","NA9.DE","DE",null],
+["ProSiebenSat.1","PSM.DE","DE",null],
+["RTL Group","RRTL.DE","DE",null],
+["SGL Carbon","SGL.DE","DE",null],
+["Sixt","SIX2.DE","DE",null],
+["Stabilus","STM.DE","DE",null],
+["Siltronic","WAF.DE","DE",null],
+["Wacker Neuson","WAC.DE","DE",null],
+["Deutz","DEZ.DE","DE",null],
+["Fielmann","FIE.DE","DE",null],
+["IONOS","IOS.DE","DE",null],
+["DWS Group","DWS.DE","DE",null],
+["Freenet","FNTN.DE","DE",null],
+["Auto1","AG1.DE","DE",null],
+["Scout24","G24.DE","DE",null],
+["Redcare Pharmacy","RDC.DE","DE",null],
+["Suedzucker","SZU.DE","DE",null],
+["Ceconomy","CEC.DE","DE",null],
+["Aurubis","NDA.DE","DE",null],
+["Toyota","7203.T","JP",17.0],
+["MUFG","8306.T","JP",null],
+["Sony","6758.T","JP",4.5],
+["SoftBank Group","9984.T","JP",null],
+["Tokyo Electron","8035.T","JP",null],
+["Keyence","6861.T","JP",null],
+["SMFG","8316.T","JP",null],
+["NTT","9432.T","JP",14.0],
+["Mitsubishi Corp","8058.T","JP",null],
+["Itochu","8001.T","JP",null],
+["Hitachi","6501.T","JP",null],
+["Shin-Etsu Chemical","4063.T","JP",null],
+["Fast Retailing","9983.T","JP",null],
+["Mitsui & Co","8031.T","JP",null],
+["Mizuho","8411.T","JP",null],
+["Nintendo","7974.T","JP",null],
+["Recruit","6098.T","JP",null],
+["Mitsubishi Heavy","7011.T","JP",null],
+["Daikin","6367.T","JP",null],
+["Chugai Pharma","4519.T","JP",null],
+["Denso","6902.T","JP",null],
+["KDDI","9433.T","JP",4.0],
+["Takeda","4502.T","JP",null],
+["Tokio Marine","8766.T","JP",null],
+["Fanuc","6954.T","JP",null],
+["Honda","7267.T","JP",5.0],
+["Sumitomo Corp","8053.T","JP",null],
+["Advantest","6857.T","JP",null],
+["Daiichi Sankyo","4568.T","JP",null],
+["Japan Tobacco","2914.T","JP",null],
+["Hoya","7741.T","JP",null],
+["MS&AD","8725.T","JP",null],
+["Oriental Land","4661.T","JP",null],
+["Murata","6981.T","JP",null],
+["Orix","8591.T","JP",null],
+["Nidec","6594.T","JP",null],
+["SoftBank Corp","9434.T","JP",null],
+["Canon","7751.T","JP",null],
+["Mitsubishi Electric","6503.T","JP",null],
+["Olympus","7733.T","JP",null],
+["Terumo","4543.T","JP",null],
+["Komatsu","6301.T","JP",null],
+["Mitsui Fudosan","8801.T","JP",null],
+["Dai-ichi Life","8750.T","JP",null],
+["Mitsubishi Estate","8802.T","JP",null],
+["Fujitsu","6702.T","JP",null],
+["Fujifilm","4901.T","JP",null],
+["Suzuki","7269.T","JP",null],
+["TDK","6762.T","JP",null],
+["JR East","9020.T","JP",null],
+["Renesas","6723.T","JP",null],
+["Seven & i","3382.T","JP",null],
+["Bridgestone","5108.T","JP",null],
+["Otsuka","4578.T","JP",null],
+["Kyocera","6971.T","JP",null],
+["Bandai Namco","7832.T","JP",null],
+["Kubota","6326.T","JP",null],
+["Marubeni","8002.T","JP",null],
+["JR Central","9022.T","JP",null],
+["Asahi Group","2502.T","JP",null],
+["Astellas","4503.T","JP",null],
+["Unicharm","8113.T","JP",null],
+["Kao","4452.T","JP",null],
+["Kansai Electric","9503.T","JP",null],
+["Tokyo Gas","9531.T","JP",null],
+["Nippon Steel","5401.T","JP",5.0],
+["ENEOS","5020.T","JP",null],
+["Daiwa House","1925.T","JP",null],
+["Sekisui House","1928.T","JP",null],
+["Ajinomoto","2802.T","JP",null],
+["Asahi Kasei","3407.T","JP",null],
+["Shionogi","4507.T","JP",null],
+["Eisai","4523.T","JP",null],
+["LY Corp","4689.T","JP",null],
+["Disco","6146.T","JP",null],
+["Japan Post Holdings","6178.T","JP",null],
+["Japan Post Bank","7182.T","JP",null],
+["Nissan","7201.T","JP",null],
+["Subaru","7270.T","JP",null],
+["Yamaha Motor","7272.T","JP",null],
+["Sompo","8630.T","JP",null],
+["Nomura","8604.T","JP",null],
+["Aeon","8267.T","JP",null],
+["Japan Airlines","9201.T","JP",null],
+["ANA Holdings","9202.T","JP",null],
+["Nippon Yusen","9101.T","JP",null],
+["Mitsui OSK Lines","9104.T","JP",null],
+["Secom","9735.T","JP",null],
+["NTT Data","9613.T","JP",null],
+["Nitto Denko","6988.T","JP",null],
+["Sysmex","6869.T","JP",null],
+["Shimano","7309.T","JP",null],
+["Rakuten","4755.T","JP",null],
+["Nexon","3659.T","JP",null],
+["M3","2413.T","JP",null],
+["Kikkoman","2801.T","JP",null],
+["Sumitomo Electric","5802.T","JP",null],
+["Idemitsu Kosan","5019.T","JP",null],
+["Inpex","1605.T","JP",null],
+["Sumitomo Mitsui Trust","8309.T","JP",null],
+["Reliance","RELIANCE.NS","IN",15.0],
+["TCS","TCS.NS","IN",null],
+["HDFC Bank","HDFCBANK.NS","IN",null],
+["Bharti Airtel","BHARTIARTL.NS","IN",3.5],
+["ICICI Bank","ICICIBANK.NS","IN",null],
+["Infosys","INFY.NS","IN",null],
+["State Bank of India","SBIN.NS","IN",null],
+["LIC","LICI.NS","IN",null],
+["ITC","ITC.NS","IN",null],
+["Hindustan Unilever","HINDUNILVR.NS","IN",null],
+["Larsen & Toubro","LT.NS","IN",null],
+["HCL Tech","HCLTECH.NS","IN",null],
+["Bajaj Finance","BAJFINANCE.NS","IN",null],
+["Sun Pharma","SUNPHARMA.NS","IN",null],
+["Maruti Suzuki","MARUTI.NS","IN",null],
+["Kotak Bank","KOTAKBANK.NS","IN",null],
+["Mahindra & Mahindra","M&M.NS","IN",null],
+["Axis Bank","AXISBANK.NS","IN",null],
+["UltraTech Cement","ULTRACEMCO.NS","IN",null],
+["NTPC","NTPC.NS","IN",4.5],
+["Adani Enterprises","ADANIENT.NS","IN",null],
+["ONGC","ONGC.NS","IN",5.5],
+["Titan","TITAN.NS","IN",null],
+["Bajaj Finserv","BAJAJFINSV.NS","IN",null],
+["Adani Ports","ADANIPORTS.NS","IN",1.5],
+["Power Grid","POWERGRID.NS","IN",null],
+["Wipro","WIPRO.NS","IN",null],
+["JSW Steel","JSWSTEEL.NS","IN",null],
+["Tata Steel","TATASTEEL.NS","IN",2.7],
+["Coal India","COALINDIA.NS","IN",null],
+["Nestle India","NESTLEIND.NS","IN",null],
+["Asian Paints","ASIANPAINT.NS","IN",null],
+["Tech Mahindra","TECHM.NS","IN",null],
+["Hindalco","HINDALCO.NS","IN",null],
+["Grasim","GRASIM.NS","IN",null],
+["Bharat Electronics","BEL.NS","IN",null],
+["Trent","TRENT.NS","IN",null],
+["SBI Life","SBILIFE.NS","IN",null],
+["HDFC Life","HDFCLIFE.NS","IN",null],
+["Cipla","CIPLA.NS","IN",null],
+["Dr Reddy's","DRREDDY.NS","IN",null],
+["BPCL","BPCL.NS","IN",null],
+["Eicher Motors","EICHERMOT.NS","IN",null],
+["Tata Consumer","TATACONSUM.NS","IN",null],
+["Apollo Hospitals","APOLLOHOSP.NS","IN",null],
+["Adani Power","ADANIPOWER.NS","IN",null],
+["Adani Green","ADANIGREEN.NS","IN",null],
+["Indian Oil","IOC.NS","IN",5.0],
+["Vedanta","VEDL.NS","IN",null],
+["DLF","DLF.NS","IN",null],
+["Hindustan Aeronautics","HAL.NS","IN",null],
+["Bajaj Auto","BAJAJ-AUTO.NS","IN",null],
+["InterGlobe Aviation","INDIGO.NS","IN",null],
+["Jio Financial","JIOFIN.NS","IN",null],
+["Tata Motors","TATAMOTORS.NS","IN",4.0],
+["Tata Power","TATAPOWER.NS","IN",null],
+["Shriram Finance","SHRIRAMFIN.NS","IN",null],
+["Pidilite","PIDILITIND.NS","IN",null],
+["Divi's Labs","DIVISLAB.NS","IN",null],
+["Hero MotoCorp","HEROMOTOCO.NS","IN",null],
+["Ambuja Cements","AMBUJACEM.NS","IN",null],
+["GAIL","GAIL.NS","IN",null],
+["Siemens India","SIEMENS.NS","IN",null],
+["ABB India","ABB.NS","IN",null],
+["Havells","HAVELLS.NS","IN",null],
+["Bank of Baroda","BANKBARODA.NS","IN",null],
+["Punjab National Bank","PNB.NS","IN",null],
+["Canara Bank","CANBK.NS","IN",null],
+["IndusInd Bank","INDUSINDBK.NS","IN",null],
+["LTIMindtree","LTIM.NS","IN",null],
+["Muthoot Finance","MUTHOOTFIN.NS","IN",null],
+["Cholamandalam","CHOLAFIN.NS","IN",null],
+["Bajaj Holdings","BAJAJHLDNG.NS","IN",null],
+["Avenue Supermarts","DMART.NS","IN",null],
+["Godrej Consumer","GODREJCP.NS","IN",null],
+["Dabur","DABUR.NS","IN",null],
+["Marico","MARICO.NS","IN",null],
+["Britannia","BRITANNIA.NS","IN",null],
+["Colgate-Palmolive India","COLPAL.NS","IN",null],
+["SBI Cards","SBICARD.NS","IN",null],
+["ICICI Lombard","ICICIGI.NS","IN",null],
+["Macrotech Developers","LODHA.NS","IN",null],
+["NMDC","NMDC.NS","IN",null],
+["SAIL","SAIL.NS","IN",null],
+["Jindal Steel","JINDALSTEL.NS","IN",null],
+["Power Finance Corp","PFC.NS","IN",null],
+["REC","RECLTD.NS","IN",null],
+["IRFC","IRFC.NS","IN",null],
+["IRCTC","IRCTC.NS","IN",null],
+["HPCL","HINDPETRO.NS","IN",null],
+["Oil India","OIL.NS","IN",null],
+["NHPC","NHPC.NS","IN",null],
+["Torrent Pharma","TORNTPHARM.NS","IN",null],
+["Lupin","LUPIN.NS","IN",null],
+["Aurobindo Pharma","AUROPHARMA.NS","IN",null],
+["Eternal (Zomato)","ETERNAL.NS","IN",null],
+["Polycab","POLYCAB.NS","IN",null],
+["Cummins India","CUMMINSIND.NS","IN",null],
+["TVS Motor","TVSMOTOR.NS","IN",null],
+["Ashok Leyland","ASHOKLEY.NS","IN",null]]/*CO_END*/.map(a=>({n:a[0],t:a[1],c:a[2],cap:a[3]}));
+/* indicative share (%) of each country's announced investment — edit freely */
+const REGIONS={
+US:[["Texas",14],["California",12],["Arizona",8],["Georgia",7],["Ohio",6]],
+CN:[["Guangdong",13],["Jiangsu",12],["Zhejiang",9],["Shanghai",8],["Shandong",7]],
+DE:[["North Rhine-Westphalia",18],["Bavaria",15],["Baden-Württemberg",14],["Saxony",7],["Brandenburg",6]],
+JP:[["Tokyo",22],["Osaka",10],["Aichi",9],["Kanagawa",8],["Kumamoto",6]],
+IN:[["Maharashtra",20],["Gujarat",14],["Karnataka",11],["Tamil Nadu",10],["Telangana",7]]
+};
+const CT={US:["United States","🇺🇸","USA"],CN:["China","🇨🇳","CHN"],DE:["Germany","🇩🇪","DEU"],JP:["Japan","🇯🇵","JPN"],IN:["India","🇮🇳","IND"]};
+const SYM={USD:"$",INR:"₹",EUR:"€",GBP:"£",JPY:"¥",CNY:"CN¥",AED:"AED ",SGD:"S$",CAD:"C$",AUD:"A$"};
+const FALLBACK={USD:1,INR:88,EUR:.86,GBP:.75,JPY:150,CNY:7.1,AED:3.67,SGD:1.29,CAD:1.38,AUD:1.5};
+const THEMES=["dark","light","glass","amoled"];
+const FONTS={Inter:"'Inter'",Grotesk:"'Space Grotesk'",Mono:"'JetBrains Mono'",Serif:"'Playfair Display'",Poppins:"'Poppins'",Sora:"'Sora'"};
+const ACCS=["#4ade80","#38bdf8","#f472b6","#fbbf24","#a78bfa","#fb7185"];
+
+/* ============ STATE ============ */
+const $=id=>document.getElementById(id);
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let S=Object.assign({theme:"dark",font:"Inter",acc:ACCS[0],cur:"USD",feed:"",cvAmt:"1000",cvFrom:"USD",cvTo:"INR"},load("ca_s",{}));
+let RATES=load("ca_rates",FALLBACK),FXAGE=load("ca_fxage",null),FXLIVE=false;
+let HIST=load("ca_hist",[]),FDI=load("ca_fdi",{}),FDILIVE=false,sel="ALL",showAll=false;
+let FEED=load("ca_feed",null);
+let LAST=load("ca_last",{fx:0,fdi:0,feed:0});
+const DAY=864e5,fresh=t=>!!t&&Date.now()-t<DAY*1.5;
+FXLIVE=fresh(LAST.fx);FDILIVE=fresh(LAST.fdi);
+function applyFeed(){
+  const m=(FEED&&FEED.companies)||{};
+  COMPANIES.forEach(c=>{const f=m[c.t];if(f&&f.cap!=null){c.cap=f.cap;c.fcf=f.fcf==null?null:f.fcf;c.fy=f.fy}});
+}
+applyFeed();
+const withData=c=>c.cap!=null;
+
+/* ============ FORMAT ============ */
+function money(b){
+  if(b==null)return "—";
+  const r=RATES[S.cur]||1,v=b*r,neg=v<0,a=Math.abs(v),s=SYM[S.cur]||S.cur+" ";
+  let out;
+  if(S.cur==="INR")out=s+Math.round(a*100).toLocaleString("en-IN")+" Cr";
+  else if(a>=1000)out=s+(a/1000).toFixed(2)+"T";
+  else out=s+(a>=100?a.toFixed(0):a.toFixed(1))+"B";
+  return (neg?"−":"")+out;
+}
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+
+/* ============ RENDER ============ */
+function apply(){
+  document.documentElement.dataset.theme=S.theme;
+  document.documentElement.style.setProperty("--font",FONTS[S.font]+",system-ui,sans-serif");
+  document.documentElement.style.setProperty("--acc",S.acc);
+  save("ca_s",S);
+}
+function renderHero(){
+  const inr=RATES.INR;
+  $("fxNow").textContent=inr?inr.toFixed(2)+" ₹":"—";
+  $("fxAge").textContent=(FXLIVE?"live · ":"offline · ")+(FXAGE?new Date(FXAGE).toLocaleDateString(undefined,{day:"numeric",month:"short"}):"estimate");
+  const sv=$("spark");
+  if(HIST.length>2){
+    const vals=HIST.map(h=>h[1]),mn=Math.min(...vals),mx=Math.max(...vals),span=(mx-mn)||1;
+    const pts=vals.map((v,i)=>[i/(vals.length-1)*300,62-((v-mn)/span)*54]);
+    const d="M"+pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" L");
+    sv.innerHTML=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S.acc}" stop-opacity=".35"/><stop offset="1" stop-color="${S.acc}" stop-opacity="0"/></linearGradient></defs><path d="${d} L300,70 L0,70Z" fill="url(#g)"/><path d="${d}" fill="none" stroke="${S.acc}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+    const first=vals[0],ch=(inr-first)/first*100;
+    $("fxDelta").innerHTML=`<span class="${ch>0?'up':'dn'}">${ch>0?'▲':'▼'} ${Math.abs(ch).toFixed(2)}%</span> <span style="color:var(--mut);font-weight:400">over ${HIST.length>25?"30 days":HIST.length+" days"}. ${ch>0?"Rupee weaker":"Rupee stronger"}</span>`;
+  }
+}
+function renderCur(){
+  const keys=Object.keys(SYM);
+  $("cur").innerHTML=keys.map(k=>`<option ${k===S.cur?"selected":""}>${k}</option>`).join("");
+}
+function renderChips(){
+  $("chips").innerHTML=[["ALL","🌐 All five"],...Object.keys(CT).map(k=>[k,CT[k][1]+" "+CT[k][0]])]
+    .map(([k,l])=>`<div class="chip ${sel===k?"on":""}" data-k="${k}">${l}</div>`).join("");
+}
+function renderCtry(){
+  const tot={},cnt={};COMPANIES.forEach(c=>{tot[c.c]=(tot[c.c]||0)+(c.cap||0);if(withData(c))cnt[c.c]=(cnt[c.c]||0)+1});
+  const maxC=Math.max(1,...Object.values(tot)),maxF=Math.max(1,...Object.values(FDI).map(f=>f.v||0));
+  $("ctry").innerHTML=Object.keys(CT).sort((a,b)=>tot[b]-tot[a]).map(k=>{
+    const f=FDI[k];
+    return `<div class="row" data-k="${k}" style="cursor:pointer"><div class="fl">${CT[k][1]}</div>
+    <div class="nm"><b>${CT[k][0]}</b><div class="bar"><div style="width:${tot[k]/maxC*100}%"></div></div>
+    <div class="bar b2"><div style="width:${f?f.v/maxF*100:0}%"></div></div></div>
+    <div class="vl">${money(tot[k])}<i>${cnt[k]||0}/100 reporting · FDI ${f?money(f.v)+" ("+f.y+")":"…"}</i></div></div>`}).join("");
+}
+function renderCos(){
+  const q=($("q").value||"").trim().toLowerCase();
+  let list=COMPANIES.filter(c=>(sel==="ALL"||c.c===sel)&&(!q||c.n.toLowerCase().includes(q)||c.t.toLowerCase().includes(q)))
+    .sort((a,b)=>(b.cap==null?-1:b.cap)-(a.cap==null?-1:a.cap));
+  const total=list.length,view=(showAll||q)?list:list.slice(0,10),mx=Math.max(...list.map(c=>c.cap||0),1);
+  const have=Object.keys((FEED&&FEED.companies)||{}).length>0;
+  $("coTitle").innerHTML=`Top companies <span>${total} listed · capex${have?"":" (partial snapshot)"}</span>`;
+  $("cos").innerHTML=view.length?view.map((c,i)=>`<div class="row"><div class="rk">${i+1}</div><div class="fl">${CT[c.c][1]}</div>
+    <div class="nm"><b>${esc(c.n)}</b><div class="bar"><div style="width:${(c.cap||0)/mx*100}%"></div></div></div>
+    <div class="vl">${money(c.cap)}<i>${c.fcf!=null?"free cash "+money(c.fcf):esc(c.t)}</i></div></div>`).join(""):`<div class="row"><div class="nm"><i>No match</i></div></div>`;
+  $("more").style.display=(total>10&&!q)?"block":"none";
+  $("more").textContent=showAll?"Show top 10":"Show all "+total;
+}
+function renderRegs(){
+  const ks=sel==="ALL"?Object.keys(CT):[sel];
+  let h="";
+  if(sel==="ALL"){
+    h=ks.map(k=>{const r=REGIONS[k][0];return `<div class="row"><div class="fl">${CT[k][1]}</div><div class="nm"><b>${r[0]}</b><i>${CT[k][0]} · top region</i><div class="bar"><div style="width:${r[1]*3.5}%"></div></div></div><div class="vl">${r[1]}%</div></div>`}).join("");
+  }else{
+    const mx=REGIONS[sel][0][1];
+    h=REGIONS[sel].map((r,i)=>`<div class="row"><div class="rk">${i+1}</div><div class="nm"><b>${r[0]}</b><div class="bar"><div style="width:${r[1]/mx*100}%"></div></div></div><div class="vl">${r[1]}%</div></div>`).join("");
+  }
+  $("regs").innerHTML=h;
+}
+function renderStatus(){
+  const d=(ok,t)=>`<span class="dot ${ok?"ok":"bad"}"></span>${t}`;
+  const ago=t=>t?new Date(t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"}):"not yet";
+  const n=Object.keys((FEED&&FEED.companies)||{}).length;
+  const url=(S.feed||DATA_URL).trim();
+  const ft=n?`Company capex: yfinance feed, ${n} companies${FEED.updated?", built "+ago(Date.parse(FEED.updated)):""}`
+    :url?"Company capex feed set but not loaded yet":"Company capex: built-in snapshot only (set the data feed URL in settings for daily yfinance data)";
+  $("status").innerHTML=d(FXLIVE,"Exchange rates: open.er-api.com, refreshed daily")+" <small>("+ago(LAST.fx)+")</small><br>"
+    +d(FDILIVE,"FDI inflows: World Bank, annual data, checked daily")+" <small>("+ago(LAST.fdi)+")</small><br>"
+    +d(n&&fresh(LAST.feed),ft)+(n?" <small>(checked "+ago(LAST.feed)+")</small>":"")+"<br>"
+    +"Auto-update runs once every 24h whenever the app is open or reopened. Regional shares are indicative, not live. No free source publishes state-level investment for all five countries.";
+}
+function fmtCur(v,c){
+  try{return new Intl.NumberFormat(c==="INR"?"en-IN":undefined,{style:"currency",currency:c,maximumFractionDigits:Math.abs(v)<1?4:2}).format(v)}catch(e){return v.toFixed(2)+" "+c}
+}
+function calcConv(){
+  const a=parseFloat(String($("cvAmt").value).replace(/,/g,"")),f=RATES[S.cvFrom],t=RATES[S.cvTo];
+  if(!f||!t||isNaN(a)){$("cvOut").textContent="—";$("cvRate").textContent="";return}
+  const r=t/f;
+  $("cvOut").textContent=fmtCur(a*r,S.cvTo);
+  $("cvRate").textContent="1 "+S.cvFrom+" = "+(r>=1?r.toFixed(4):r.toPrecision(4))+" "+S.cvTo;
+}
+function renderConv(){
+  const ks=Object.keys(RATES).sort(),opts=v=>ks.map(k=>`<option ${k===v?"selected":""}>${k}</option>`).join("");
+  $("cvFrom").innerHTML=opts(S.cvFrom);$("cvTo").innerHTML=opts(S.cvTo);
+  if(document.activeElement!==$("cvAmt"))$("cvAmt").value=S.cvAmt;
+  calcConv();
+}
+function renderAll(){apply();renderCur();renderConv();renderHero();renderChips();renderCtry();renderCos();renderRegs();renderStatus()}
+
+/* ============ LIVE DATA ============ */
+async function getFX(){
+  let ok=false;
+  try{
+    const r=await fetch("https://open.er-api.com/v6/latest/USD");const j=await r.json();
+    if(j.result==="success"){RATES=j.rates;FXAGE=j.time_last_update_utc;FXLIVE=true;ok=true;save("ca_rates",RATES);save("ca_fxage",FXAGE)}
+  }catch(e){}
+  try{
+    const end=new Date(),st=new Date(Date.now()-30*864e5),f=d=>d.toISOString().slice(0,10);
+    const r=await fetch(`https://api.frankfurter.dev/v1/${f(st)}..${f(end)}?base=USD&symbols=INR`);const j=await r.json();
+    HIST=Object.entries(j.rates).map(([d,v])=>[d,v.INR]);save("ca_hist",HIST);
+  }catch(e){}
+  if(ok){LAST.fx=Date.now();save("ca_last",LAST)}
+  renderHero();renderConv();renderCtry();renderCos();renderRegs();renderStatus();
+  return ok;
+}
+async function getFDI(){
+  try{
+    const r=await fetch("https://api.worldbank.org/v2/country/US;CN;DE;JP;IN/indicator/BX.KLT.DINV.CD.WD?format=json&mrnev=1&per_page=20");
+    const j=await r.json();
+    (j[1]||[]).forEach(x=>{if(x.value!=null)FDI[x.country.id]={v:x.value/1e9,y:x.date}});
+    if(j[1]&&j[1].length){FDILIVE=true;LAST.fdi=Date.now();save("ca_fdi",FDI);save("ca_last",LAST)}
+  }catch(e){}
+  renderCtry();renderStatus();
+}
+async function getFeed(){
+  const url=(S.feed||DATA_URL).trim();
+  if(!url)return false;
+  try{
+    const r=await fetch(url+(url.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    if(!j||!j.companies||typeof j.companies!=="object")throw 0;
+    FEED=j;save("ca_feed",FEED);applyFeed();
+    LAST.feed=Date.now();save("ca_last",LAST);
+    renderCtry();renderCos();renderStatus();
+    return true;
+  }catch(e){return false}
+}
+
+/* ============ EVENTS ============ */
+$("cur").onchange=e=>{S.cur=e.target.value;save("ca_s",S);renderCtry();renderCos()};
+$("chips").onclick=e=>{const k=e.target.dataset.k;if(k){sel=k;showAll=false;renderChips();renderCos();renderRegs()}};
+$("ctry").onclick=e=>{const r=e.target.closest(".row");if(r){sel=r.dataset.k;showAll=false;renderChips();renderCos();renderRegs();$("coTitle").scrollIntoView({behavior:"smooth"})}};
+$("more").onclick=()=>{showAll=!showAll;renderCos()};
+$("gear").onclick=()=>$("sheet").classList.add("open");
+$("close").onclick=()=>$("sheet").classList.remove("open");
+$("sheet").onclick=e=>{if(e.target.id==="sheet")$("sheet").classList.remove("open")};
+$("feed").onchange=e=>{S.feed=e.target.value.trim();save("ca_s",S);LAST.feed=0;autoUpdate(true)};
+$("q").oninput=()=>renderCos();
+$("cvAmt").oninput=e=>{S.cvAmt=e.target.value;save("ca_s",S);calcConv()};
+$("cvFrom").onchange=e=>{S.cvFrom=e.target.value;save("ca_s",S);calcConv()};
+$("cvTo").onchange=e=>{S.cvTo=e.target.value;save("ca_s",S);calcConv()};
+$("cvSwap").onclick=()=>{[S.cvFrom,S.cvTo]=[S.cvTo,S.cvFrom];save("ca_s",S);renderConv()};
+$("reset").onclick=()=>{try{localStorage.clear()}catch(e){}location.reload()};
+function buildSettings(){
+  $("themes").innerHTML=THEMES.map(t=>`<button data-t="${t}" class="${S.theme===t?"on":""}">${t[0].toUpperCase()+t.slice(1)}</button>`).join("");
+  $("fonts").innerHTML=Object.keys(FONTS).map(f=>`<button data-f="${f}" class="${S.font===f?"on":""}" style="font-family:${FONTS[f]}">${f}</button>`).join("");
+  $("accs").innerHTML=ACCS.map(a=>`<button class="sw ${S.acc===a?"on":""}" data-a="${a}" style="background:${a}" aria-label="${a}"></button>`).join("");
+}
+$("themes").onclick=e=>{if(e.target.dataset.t){S.theme=e.target.dataset.t;buildSettings();renderAll()}};
+$("fonts").onclick=e=>{if(e.target.dataset.f){S.font=e.target.dataset.f;buildSettings();renderAll()}};
+$("accs").onclick=e=>{if(e.target.dataset.a){S.acc=e.target.dataset.a;buildSettings();renderAll()}};
+
+/* ============ DAILY AUTO-UPDATE ============ */
+let running=false;
+async function autoUpdate(force){
+  if(running)return;running=true;
+  try{
+    const now=Date.now(),jobs=[];
+    if(force||now-LAST.fx>DAY)jobs.push(getFX());
+    if(force||now-LAST.fdi>DAY)jobs.push(getFDI());
+    await Promise.all(jobs);
+    if(force||now-(LAST.feed||0)>DAY)await getFeed();
+  }catch(e){}
+  running=false;renderStatus();
+}
+$("updAll").onclick=async()=>{const b=$("updAll");b.disabled=true;b.textContent="Updating...";await autoUpdate(true);b.disabled=false;b.textContent="Update everything now"};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)autoUpdate(false)});
+setInterval(()=>autoUpdate(false),30*60*1000);
+
+$("feed").value=S.feed||DATA_URL;
+buildSettings();renderAll();autoUpdate(false);
+</script>
+</body>
+</html>
